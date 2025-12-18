@@ -1878,6 +1878,10 @@
         try { tg?.BackButton?.hide(); } catch { }
       }
 
+      // Alias for home button
+      const showMenu = showModeSelect;
+
+
       function showDifficultySelect(modeId) {
         hideAllScreens();
         screenDifficultySelect.classList.add("on");
