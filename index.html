@@ -2547,7 +2547,7 @@
         installCardTapTarget(lvl);
 
         pillProgress.textContent = `${state.playPos + 1}/${state.playlist.length}`;
-        topSub.textContent = `${modeName} • ${state.playPos + 1}/${state.playlist.length}`;
+        topSub.textContent = modeName; // Убран счетчик уровней
 
         // Update progress indicator
         const progressPercent = ((state.playPos + 1) / state.playlist.length) * 100;
