@@ -1278,6 +1278,331 @@
           hints: ["Ищи «неприятную правду».", "Нажми «ты ошибся»."],
           fail: { why: "Правило уровня: выбери вариант, который признаёт ошибку.", clue: "Намёк: «обычно скрывают»." }
         },
+        {
+          id: 21, tag: "Шрифт",
+          text: "Моноширинный шрифт используют программисты. Не будь как все.",
+          sub: "Обрати внимание на стиль текста.",
+          options: [
+            { text: "код", style: { tone: "blue", weight: 900, mono: true } },
+            { text: "текст", style: { tone: "green", weight: 900 } },
+            { text: "данные", style: { tone: "red", weight: 900, mono: true } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай моноширинный шрифт.", "Выбери обычный текст без кода."],
+          fail: { why: "Моноширинный шрифт — признак кода. Нужен обычный текст.", clue: "Намёк: «программисты» и стиль шрифта." }
+        },
+        {
+          id: 22, tag: "Регистр",
+          text: "КАПСЛОК — это крик. Не кричи.",
+          sub: "Громкость текста имеет значение.",
+          options: [
+            { text: "СОГЛАСЕН", style: { tone: "red", weight: 950, upper: true } },
+            { text: "согласен", style: { tone: "green", weight: 900 } },
+            { text: "ОТКАЗ", style: { tone: "blue", weight: 950, upper: true } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай капслока.", "Выбери вариант в нижнем регистре."],
+          fail: { why: "КАПСЛОК воспринимается как крик. Нужен спокойный вариант.", clue: "Намёк: «крик» и заглавные буквы." }
+        },
+        {
+          id: 23, tag: "Числа",
+          text: "Выбери нечётное число. Чётные приносят неудачу.",
+          sub: "Математика проста.",
+          options: [
+            { text: "4", style: { tone: "blue", weight: 900 } },
+            { text: "7", style: { tone: "green", weight: 900 } },
+            { text: "8", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Нечётное — это не делится на 2.", "Семь — нечётное число."],
+          fail: { why: "Выбрано чётное число. Нужно было нечётное.", clue: "Намёк: «нечётное число»." }
+        },
+        {
+          id: 24, tag: "Противоположность",
+          text: "Делай наоборот. Если написано «стоп», то...",
+          sub: "Логика наизнанку.",
+          options: [
+            { text: "стоп", style: { tone: "red", weight: 950 } },
+            { text: "иди", style: { tone: "green", weight: 900 } },
+            { text: "жди", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Противоположность «стоп» — это движение.", "Выбери «иди»."],
+          fail: { why: "Нужно было сделать наоборот.", clue: "Намёк: «делай наоборот»." }
+        },
+        {
+          id: 25, tag: "Длина",
+          text: "Краткость — сестра таланта. Выбери самый короткий.",
+          sub: "Считай буквы.",
+          options: [
+            { text: "возможно", style: { tone: "blue", weight: 900 } },
+            { text: "да", style: { tone: "green", weight: 900 } },
+            { text: "наверное", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Самый короткий вариант — два символа.", "Выбери «да»."],
+          fail: { why: "Нужен был самый короткий вариант.", clue: "Намёк: «краткость»." }
+        },
+        {
+          id: 26, tag: "Вес шрифта",
+          text: "Жирный шрифт привлекает внимание. Это ловушка.",
+          sub: "Не попадайся на выделение.",
+          options: [
+            { text: "важно", style: { tone: "red", weight: 950 } },
+            { text: "обычно", style: { tone: "green", weight: 700 } },
+            { text: "срочно", style: { tone: "blue", weight: 950 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай жирного шрифта.", "Выбери обычный вес."],
+          fail: { why: "Жирный шрифт — приманка для внимания.", clue: "Намёк: «привлекает внимание»." }
+        },
+        {
+          id: 27, tag: "Курсив",
+          text: "Наклонный текст — это сомнение. Будь уверен.",
+          sub: "Прямой путь лучше.",
+          options: [
+            { text: "может быть", style: { tone: "blue", weight: 900, italic: true } },
+            { text: "точно", style: { tone: "green", weight: 900 } },
+            { text: "вероятно", style: { tone: "red", weight: 900, italic: true } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай курсива.", "Выбери прямой текст."],
+          fail: { why: "Курсив означает неуверенность. Нужна уверенность.", clue: "Намёк: «наклонный» и «сомнение»." }
+        },
+        {
+          id: 28, tag: "Первая буква",
+          text: "Алфавит начинается с «А». Начни с начала.",
+          sub: "Порядок букв важен.",
+          options: [
+            { text: "выбор", style: { tone: "blue", weight: 900 } },
+            { text: "ответ", style: { tone: "green", weight: 900 } },
+            { text: "решение", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Ищи слово, начинающееся с первых букв алфавита.", "«Ответ» начинается с «О» — ближе к началу."],
+          fail: { why: "Нужно было выбрать слово, ближайшее к началу алфавита.", clue: "Намёк: «начинается с А»." }
+        },
+        {
+          id: 29, tag: "Симметрия",
+          text: "Симметрия — это красота. Выбери симметричное слово.",
+          sub: "Палиндромы прекрасны.",
+          options: [
+            { text: "шалаш", style: { tone: "green", weight: 900 } },
+            { text: "домик", style: { tone: "blue", weight: 900 } },
+            { text: "город", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 0 },
+          hints: ["Палиндром читается одинаково в обе стороны.", "«Шалаш» — палиндром."],
+          fail: { why: "Нужен был палиндром.", clue: "Намёк: «симметрия»." }
+        },
+        {
+          id: 30, tag: "Отрицание",
+          text: "Не выбирай то, что начинается с «не».",
+          sub: "Отрицание — это плохо.",
+          options: [
+            { text: "нельзя", style: { tone: "red", weight: 900 } },
+            { text: "можно", style: { tone: "green", weight: 900 } },
+            { text: "нет", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай слов с «не».", "Выбери «можно»."],
+          fail: { why: "Слово начинается с отрицания «не».", clue: "Намёк: «начинается с не»." }
+        },
+        {
+          id: 31, tag: "Количество",
+          text: "Три — магическое число. Но не сегодня.",
+          sub: "Избегай тройки.",
+          options: [
+            { text: "один", style: { tone: "blue", weight: 900 } },
+            { text: "два", style: { tone: "green", weight: 900 } },
+            { text: "три", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tapAnyExcept", index: 2 },
+          hints: ["Не выбирай «три».", "Любой вариант кроме тройки."],
+          fail: { why: "Тройка запрещена на этом уровне.", clue: "Намёк: «не сегодня»." }
+        },
+        {
+          id: 32, tag: "Пробелы",
+          text: "Пробел — это пауза. Не торопись.",
+          sub: "Ищи вариант с пробелом.",
+          options: [
+            { text: "быстро", style: { tone: "red", weight: 900 } },
+            { text: "не спеши", style: { tone: "green", weight: 900 } },
+            { text: "сейчас", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Ищи вариант из двух слов.", "«Не спеши» содержит пробел."],
+          fail: { why: "Нужен был вариант с паузой (пробелом).", clue: "Намёк: «пауза»." }
+        },
+        {
+          id: 33, tag: "Вопрос",
+          text: "Вопросы требуют ответов. Не задавай вопросов.",
+          sub: "Утверждение лучше вопроса.",
+          options: [
+            { text: "точно?", style: { tone: "blue", weight: 900 } },
+            { text: "точно", style: { tone: "green", weight: 900 } },
+            { text: "правда?", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай вопросительных знаков.", "Выбери утверждение."],
+          fail: { why: "Вопрос — это неуверенность. Нужно утверждение.", clue: "Намёк: «не задавай вопросов»." }
+        },
+        {
+          id: 34, tag: "Середина",
+          text: "Золотая середина — миф. Выбери крайность.",
+          sub: "Избегай центра.",
+          options: [
+            { text: "левый", style: { tone: "green", weight: 900 } },
+            { text: "центр", style: { tone: "blue", weight: 900 } },
+            { text: "правый", style: { tone: "green", weight: 900 } }
+          ],
+          solution: { kind: "tapAnyExcept", index: 1 },
+          hints: ["Не выбирай середину.", "Любой крайний вариант."],
+          fail: { why: "Середина запрещена. Нужна крайность.", clue: "Намёк: «миф» и «крайность»." }
+        },
+        {
+          id: 35, tag: "Повтор",
+          text: "Повторение — мать учения. Найди повтор.",
+          sub: "Одинаковые буквы подряд.",
+          options: [
+            { text: "класс", style: { tone: "green", weight: 900 } },
+            { text: "выбор", style: { tone: "blue", weight: 900 } },
+            { text: "ответ", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 0 },
+          hints: ["Ищи двойные буквы.", "«Класс» имеет две «с»."],
+          fail: { why: "Нужно было найти слово с повторяющимися буквами.", clue: "Намёк: «повторение»." }
+        },
+        {
+          id: 36, tag: "Гласные",
+          text: "Гласные — основа слова. Выбери больше гласных.",
+          sub: "А, Е, И, О, У, Ы, Э, Ю, Я.",
+          options: [
+            { text: "строй", style: { tone: "blue", weight: 900 } },
+            { text: "идея", style: { tone: "green", weight: 900 } },
+            { text: "взгляд", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Считай гласные буквы.", "«Идея» — 3 гласных из 4 букв."],
+          fail: { why: "Нужно было выбрать слово с максимумом гласных.", clue: "Намёк: «основа слова»." }
+        },
+        {
+          id: 37, tag: "Время",
+          text: "Не трогай экран 2 секунды. Терпение — добродетель.",
+          sub: "Просто подожди.",
+          options: [
+            { text: "жду", style: { tone: "gray", weight: 900 }, passive: true },
+            { text: "жду", style: { tone: "gray", weight: 900 }, passive: true },
+            { text: "жду", style: { tone: "gray", weight: 900 }, passive: true }
+          ],
+          solution: { kind: "wait", ms: 2000 },
+          hints: ["Не нажимай ничего.", "Просто подожди 2 секунды."],
+          fail: { why: "Нужно было подождать, не трогая экран.", clue: "Намёк: «не трогай экран»." }
+        },
+        {
+          id: 38, tag: "Скорость",
+          text: "Быстрота мысли важна. Нажми дважды быстро.",
+          sub: "Двойной клик за секунду.",
+          options: [
+            { text: "быстро", style: { tone: "blue", weight: 950 } },
+            { text: "быстро", style: { tone: "blue", weight: 950 } },
+            { text: "медленно", style: { tone: "gray", weight: 900 }, passive: true }
+          ],
+          solution: { kind: "doubleTap", index: 0 },
+          hints: ["Нужен двойной клик.", "Нажми первую кнопку дважды быстро."],
+          fail: { why: "Нужен был двойной клик по первой кнопке.", clue: "Намёк: «дважды быстро»." }
+        },
+        {
+          id: 39, tag: "Удержание",
+          text: "Иногда нужно держаться. Удержи кнопку.",
+          sub: "Долгое нажатие.",
+          options: [
+            { text: "держу", style: { tone: "blue", weight: 950 } },
+            { text: "отпускаю", style: { tone: "gray", weight: 900 }, passive: true },
+            { text: "жду", style: { tone: "gray", weight: 900 }, passive: true }
+          ],
+          solution: { kind: "hold", index: 0, ms: 800 },
+          hints: ["Нужно удержать кнопку.", "Нажми и держи первую кнопку."],
+          fail: { why: "Нужно было удержать кнопку.", clue: "Намёк: «держаться»." }
+        },
+        {
+          id: 40, tag: "Последовательность",
+          text: "Порядок: 1, 2, 3. Нажми по порядку.",
+          sub: "Слева направо.",
+          options: [
+            { text: "1", style: { tone: "blue", weight: 900 } },
+            { text: "2", style: { tone: "blue", weight: 900 } },
+            { text: "3", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "sequence", seq: [0, 1, 2] },
+          hints: ["Нажимай по порядку номеров.", "1 → 2 → 3."],
+          fail: { why: "Нужно было нажать в правильном порядке.", clue: "Намёк: «по порядку»." }
+        },
+        {
+          id: 41, tag: "Обратный порядок",
+          text: "Иди против течения. Обратный порядок.",
+          sub: "Справа налево.",
+          options: [
+            { text: "начало", style: { tone: "green", weight: 900 } },
+            { text: "середина", style: { tone: "green", weight: 900 } },
+            { text: "конец", style: { tone: "green", weight: 900 } }
+          ],
+          solution: { kind: "sequence", seq: [2, 1, 0] },
+          hints: ["Нажимай справа налево.", "Конец → Середина → Начало."],
+          fail: { why: "Нужен был обратный порядок.", clue: "Намёк: «против течения»." }
+        },
+        {
+          id: 42, tag: "Чётность",
+          text: "Только чётные позиции. 2-й вариант.",
+          sub: "Пропускай нечётные.",
+          options: [
+            { text: "1-й", style: { tone: "gray", weight: 900 }, passive: true },
+            { text: "2-й", style: { tone: "green", weight: 900 } },
+            { text: "3-й", style: { tone: "gray", weight: 900 }, passive: true }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Чётная позиция — это 2, 4, 6...", "Выбери второй вариант."],
+          fail: { why: "Нужна была чётная позиция.", clue: "Намёк: «чётные позиции»." }
+        },
+        {
+          id: 43, tag: "Цифра в слове",
+          text: "Буквы и цифры не смешивают. Избегай цифр.",
+          sub: "Чистый текст лучше.",
+          options: [
+            { text: "вариант1", style: { tone: "red", weight: 900 } },
+            { text: "вариант", style: { tone: "green", weight: 900 } },
+            { text: "вариант2", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай цифр в тексте.", "Выбери чистое слово."],
+          fail: { why: "Цифры в тексте — это плохо.", clue: "Намёк: «не смешивают»." }
+        },
+        {
+          id: 44, tag: "Знаки",
+          text: "Пунктуация важна! Но не восклицания.",
+          sub: "Спокойствие.",
+          options: [
+            { text: "точно!", style: { tone: "red", weight: 950 } },
+            { text: "точно", style: { tone: "green", weight: 900 } },
+            { text: "точно?", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Избегай восклицательных знаков.", "Выбери спокойный вариант."],
+          fail: { why: "Восклицание — это эмоция. Нужно спокойствие.", clue: "Намёк: «не восклицания»." }
+        },
+        {
+          id: 45, tag: "Финал",
+          text: "Ты дошёл до конца. Выбери «конец».",
+          sub: "Всё просто.",
+          options: [
+            { text: "начало", style: { tone: "blue", weight: 900 } },
+            { text: "продолжение", style: { tone: "red", weight: 900 } },
+            { text: "конец", style: { tone: "green", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 2 },
+          hints: ["Прямая подсказка в тексте.", "Выбери «конец»."],
+          fail: { why: "Нужно было выбрать конец.", clue: "Намёк: «до конца»." }
+        },
       ];
 
       // ---------- Game Modes & Difficulties ----------
