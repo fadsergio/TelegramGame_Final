@@ -1,14 +1,2402 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>telegram-game-mistake</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Ты ошибся</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg0: #060816;
+      --bg1: #0b1230;
+      --card: rgba(255, 255, 255, .08);
+      --card2: rgba(255, 255, 255, .06);
+      --stroke: rgba(255, 255, 255, .14);
+      --text: rgba(255, 255, 255, .92);
+      --muted: rgba(255, 255, 255, .70);
+      --shadow: 0 12px 40px rgba(0, 0, 0, .45);
+      --radius: 18px;
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Enable smooth animation for progress */
+    @property --progress {
+      syntax: '<percentage>';
+      initial-value: 0%;
+      inherits: false;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 50% -10%, rgba(100, 80, 255, .35), transparent 60%),
+        radial-gradient(1000px 600px at 20% 20%, rgba(50, 200, 255, .22), transparent 55%),
+        radial-gradient(800px 500px at 90% 40%, rgba(255, 90, 140, .18), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg0));
+      color: var(--text);
+    }
+
+    .app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: calc(10px + var(--safeTop)) 12px calc(12px + var(--safeBottom));
+      gap: 10px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+
+    .brand .t {
+      font-weight: 900;
+      letter-spacing: .2px;
+    }
+
+    .brand .s {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .pillrow {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255, 255, 255, .06);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 12px;
+      user-select: none;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease;
+      touch-action: manipulation;
+      position: relative;
+    }
+
+    .pill:active {
+      transform: translateY(1px);
+    }
+
+    .pill.dim {
+      opacity: .65;
+    }
+
+    /* Progress pill with circular indicator */
+    #pillProgress {
+      padding: 7px 12px;
+      background: linear-gradient(135deg, rgba(43, 124, 255, .15), rgba(108, 195, 255, .08));
+      border-color: rgba(108, 195, 255, .25);
+      font-variant-numeric: tabular-nums;
+      min-width: 52px;
+      text-align: center;
+    }
+
+    #pillProgress::before {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 999px;
+      padding: 3px;
+      background: conic-gradient(from -90deg,
+          rgba(80, 160, 255, .85) 0%,
+          rgba(120, 200, 255, .75) var(--progress, 0%),
+          transparent var(--progress, 0%));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      opacity: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 0 4px rgba(80, 160, 255, .4));
+      transition: --progress 0.6s ease-out;
+    }
+
+    /* Hint pill with pulsing effect when active */
+    #pillHint {
+      transition: all .2s ease;
+      font-size: 16px;
+    }
+
+    #pillHint:not(.dim) {
+      background: linear-gradient(135deg, rgba(255, 200, 80, .18), rgba(255, 160, 50, .10));
+      border-color: rgba(255, 200, 80, .35);
+      animation: hintPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes hintPulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(255, 200, 80, 0);
+      }
+
+      50% {
+        box-shadow: 0 0 0 3px rgba(255, 200, 80, .25);
+      }
+    }
+
+    /* Menu pill */
+    #pillMenu {
+      background: linear-gradient(135deg, rgba(80, 200, 140, .15), rgba(100, 220, 160, .08));
+      border-color: rgba(100, 220, 160, .25);
+      transition: all .2s ease;
+      font-size: 16px;
+    }
+
+    #pillMenu:hover {
+      background: linear-gradient(135deg, rgba(80, 200, 140, .22), rgba(100, 220, 160, .12));
+      border-color: rgba(100, 220, 160, .35);
+    }
+
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+      min-height: 0;
+    }
+
+    .screen {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .screen.on {
+      display: flex;
+    }
+
+    .card {
+      flex: 1;
+      min-height: 0;
+      padding: 16px 14px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* Level transition animation */
+    .card.levelEnter {
+      animation: levelFadeIn 0.4s ease-out forwards;
+    }
+
+    @keyframes levelFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    #pillProgress::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 999px;
+      padding: 2px;
+      background: conic-gradient(from 0deg,
+          rgba(43, 124, 255, .6) 0%,
+          rgba(108, 195, 255, .4) var(--progress, 0%),
+          transparent var(--progress, 0%));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      opacity: 0.8;
+      transition: --progress 0.4s ease;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -120px -120px auto auto;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle at 30% 30%, rgba(120, 170, 255, .25), transparent 60%);
+      transform: rotate(15deg);
+      pointer-events: none;
+    }
+
+    /* Level badge in corner */
+    .levelBadge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 10;
+    }
+
+    .levelNumber {
+      font-size: 32px;
+      font-weight: 950;
+      line-height: 1;
+      color: rgba(255, 255, 255, .85);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .levelDifficulty {
+      font-size: 12px;
+      line-height: 1;
+      opacity: 0.7;
+    }
+
+    .levelDifficulty.easy {
+      color: #4ade80;
+    }
+
+    .levelDifficulty.medium {
+      color: #fbbf24;
+    }
+
+    .levelDifficulty.hard {
+      color: #f87171;
+    }
+
+    .cardTitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, .70);
+      letter-spacing: .25px;
+      text-transform: uppercase;
+    }
+
+    .cardText {
+      font-size: 20px;
+      line-height: 1.25;
+      font-weight: 780;
+      letter-spacing: .1px;
+    }
+
+    .cardSub {
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .tapTarget {
+      display: inline;
+      padding: 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, .35);
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .btnRow {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 420px) {
+      .btnRow {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    button.choice {
+      width: 100%;
+      padding: 14px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      background: rgba(255, 255, 255, .08);
+      color: var(--text);
+      font-weight: 850;
+      font-size: 16px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      transition: transform .12s ease, filter .12s ease, background .12s ease, opacity .12s ease;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+      position: relative;
+    }
+
+    /* Button entrance animation */
+    button.choice.btnEnter {
+      animation: btnFadeIn 0.3s ease-out forwards;
+    }
+
+    button.choice.btnEnter:nth-child(1) {
+      animation-delay: 0.05s;
+    }
+
+    button.choice.btnEnter:nth-child(2) {
+      animation-delay: 0.1s;
+    }
+
+    button.choice.btnEnter:nth-child(3) {
+      animation-delay: 0.15s;
+    }
+
+    @keyframes btnFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    button.choice:active {
+      transform: translateY(1px);
+      filter: brightness(1.05);
+    }
+
+    button.choice.blue {
+      background: linear-gradient(135deg, rgba(43, 124, 255, .92), rgba(108, 195, 255, .72));
+      color: #06101f;
+      border-color: rgba(180, 220, 255, .22);
+    }
+
+    button.choice.green {
+      background: linear-gradient(135deg, rgba(47, 227, 156, .92), rgba(178, 255, 217, .72));
+      color: #03140e;
+      border-color: rgba(210, 255, 235, .22);
+    }
+
+    button.choice.red {
+      background: linear-gradient(135deg, rgba(255, 77, 109, .92), rgba(255, 179, 193, .72));
+      color: #1a050b;
+      border-color: rgba(255, 200, 210, .22);
+    }
+
+    button.choice.gray {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .06));
+      color: var(--text);
+      border-color: rgba(255, 255, 255, .14);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .25);
+    }
+
+    /* third-button behaviors */
+    button.choice.passive {
+      opacity: .78;
+      filter: saturate(.9);
+    }
+
+    button.choice.disabled {
+      opacity: .48;
+      filter: saturate(.25);
+    }
+
+    /* clue highlight flashes */
+    .flashOk {
+      animation: flashOk 0.9s ease-in-out 0s 1;
+    }
+
+    .flashBad {
+      animation: flashBad 0.9s ease-in-out 0s 1;
+    }
+
+    .flashSoft {
+      animation: flashSoft 0.9s ease-in-out 0s 1;
+    }
+
+    @keyframes flashOk {
+      0% {
+        box-shadow: 0 0 0 rgba(47, 227, 156, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      20% {
+        box-shadow: 0 0 0 4px rgba(47, 227, 156, .55), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      45% {
+        box-shadow: 0 0 0 0px rgba(47, 227, 156, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      65% {
+        box-shadow: 0 0 0 3px rgba(47, 227, 156, .35), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      100% {
+        box-shadow: 0 0 0 rgba(47, 227, 156, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+    }
+
+    @keyframes flashBad {
+      0% {
+        box-shadow: 0 0 0 rgba(255, 77, 109, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      20% {
+        box-shadow: 0 0 0 4px rgba(255, 77, 109, .55), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      45% {
+        box-shadow: 0 0 0 0px rgba(255, 77, 109, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      65% {
+        box-shadow: 0 0 0 3px rgba(255, 77, 109, .35), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      100% {
+        box-shadow: 0 0 0 rgba(255, 77, 109, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+    }
+
+    @keyframes flashSoft {
+      0% {
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      25% {
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, .25), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+
+      100% {
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0), 0 10px 24px rgba(0, 0, 0, .35);
+      }
+    }
+
+    .card.cardFlash {
+      animation: cardFlash 0.9s ease-in-out 0s 1;
+    }
+
+    @keyframes cardFlash {
+      0% {
+        box-shadow: var(--shadow);
+      }
+
+      20% {
+        box-shadow: 0 0 0 4px rgba(108, 195, 255, .22), 0 12px 40px rgba(0, 0, 0, .45);
+      }
+
+      100% {
+        box-shadow: var(--shadow);
+      }
+    }
+
+    .footerHint {
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .68);
+      line-height: 1.35;
+      padding: 0 6px;
+    }
+
+    .menuCard {
+      padding: 16px 14px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--card), var(--card2));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+    }
+
+    .menuTitle {
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .menuText {
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+
+    .menuBtns {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .bigBtn {
+      padding: 14px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      background: rgba(255, 255, 255, .08);
+      color: var(--text);
+      font-weight: 950;
+      font-size: 16px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .bigBtn.primary {
+      background: linear-gradient(135deg, rgba(43, 124, 255, .92), rgba(108, 195, 255, .72));
+      color: #06101f;
+      border-color: rgba(180, 220, 255, .22);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toggle {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .switch {
+      width: 46px;
+      height: 26px;
+      background: rgba(255, 255, 255, .12);
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .switch::after {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: rgba(255, 255, 255, .85);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: left .15s ease, background .15s ease;
+    }
+
+    .switch.on {
+      background: rgba(43, 124, 255, .30);
+      border-color: rgba(108, 195, 255, .35);
+    }
+
+    .switch.on::after {
+      left: 24px;
+      background: rgba(170, 220, 255, .95);
+    }
+
+    /* Menu difficulty list */
+    .diffList {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .diffBtn {
+      text-align: left;
+      padding: 14px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      background: rgba(255, 255, 255, .08);
+      color: var(--text);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .diffBtn:active {
+      transform: translateY(1px);
+    }
+
+    .diffTop {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .diffName {
+      font-weight: 950;
+      font-size: 16px;
+    }
+
+    .diffMeta {
+      font-size: 12px;
+      color: rgba(255, 255, 255, .72);
+      white-space: nowrap;
+    }
+
+    .diffDesc {
+      margin-top: 6px;
+      color: rgba(255, 255, 255, .72);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      background: rgba(255, 255, 255, .08);
+      font-size: 12px;
+      color: rgba(255, 255, 255, .85);
+      vertical-align: baseline;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .52);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .overlay.on {
+      display: flex;
+    }
+
+    .modal {
+      width: min(520px, 100%);
+      border-radius: 18px;
+      background: rgba(15, 18, 40, .88);
+      border: 1px solid rgba(255, 255, 255, .16);
+      box-shadow: 0 18px 70px rgba(0, 0, 0, .6);
+      padding: 14px 14px 12px;
+      backdrop-filter: blur(12px);
+    }
+
+    .modalTitle {
+      font-weight: 950;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+
+    .modalText {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, .78);
+      line-height: 1.4;
+      font-size: 14px;
+    }
+
+    .modalRule {
+      margin-top: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .12);
+      color: rgba(255, 255, 255, .86);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .modalBtns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .modalBtns .bigBtn {
+      margin-top: 0;
+    }
+
+    .modalBtns .bigBtn.primary {
+      grid-column: 1 / -1;
+    }
+
+    .shake {
+      animation: shake .16s ease-in-out 0s 2;
+    }
+
+    @keyframes shake {
+      0% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-4px);
+      }
+
+      50% {
+        transform: translateX(4px);
+      }
+
+      75% {
+        transform: translateX(-3px);
+      }
+
+      100% {
+        transform: translateX(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="t">Ты ошибся</div>
+        <div class="s" id="topSub">Выбери сложность</div>
+      </div>
+      <div class="pillrow">
+        <div class="pill" id="pillMenu" style="display:none">🏠</div>
+        <div class="pill dim" id="pillProgress">—</div>
+        <div class="pill dim" id="pillHint">💡</div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <!-- MENU: Mode Selection -->
+      <div class="screen on" id="screenModeSelect">
+        <div class="menuCard">
+          <div class="menuTitle">Выбери режим игры</div>
+          <div class="menuText">
+            Каждый режим отличается количеством уровней и временем игры
+          </div>
+
+          <div class="diffList" id="modeList"></div>
+
+          <div class="menuBtns">
+            <button class="bigBtn" id="btnSettings">⚙️ Настройки</button>
+          </div>
+        </div>
+
+        <div class="footerHint">
+          Выбери режим, затем уровень сложности
+        </div>
+      </div>
+
+      <!-- MENU: Difficulty Selection -->
+      <div class="screen" id="screenDifficultySelect">
+        <div class="menuCard">
+          <div class="menuTitle" id="selectedModeTitle">Классика</div>
+          <div class="menuText" id="selectedModeDesc">
+            10 уровней • 6-8 минут
+          </div>
+
+          <div class="diffList" id="difficultyList"></div>
+
+          <div class="menuBtns">
+            <button class="bigBtn" id="btnBackToModes">← Назад к режимам</button>
+          </div>
+        </div>
+
+        <div class="footerHint">
+          Выбери уровень сложности
+        </div>
+      </div>
+
+      <!-- MENU: Settings -->
+      <div class="screen" id="screenSettings">
+        <div class="menuCard">
+          <div class="menuTitle">Настройки</div>
+
+          <div class="row">
+            <div class="toggle">
+              <div>Звуки</div>
+              <div class="switch on" id="swSfx" role="switch" aria-checked="true"></div>
+            </div>
+
+            <div class="toggle">
+              <div>Озвучка (TTS)</div>
+              <div class="switch" id="swTts" role="switch" aria-checked="false"></div>
+            </div>
+          </div>
+
+          <div class="menuText" style="margin-top:16px;font-size:13px">
+            <strong>Управление:</strong><br>
+            • Тап по варианту для выбора<br>
+            • Клавиши 1/2/3 для быстрого выбора<br>
+            • Space/Enter для продолжения<br>
+            • H для подсказки, Esc для меню
+          </div>
+
+          <div class="menuBtns" style="margin-top:16px">
+            <button class="bigBtn" id="btnResetAll">Сбросить весь прогресс</button>
+            <button class="bigBtn" id="btnBackFromSettings">← Назад</button>
+          </div>
+        </div>
+
+        <div class="footerHint">
+          Подсказки открываются после 2 попыток на уровне
+        </div>
+      </div>
+
+      <!-- GAME -->
+      <div class="screen" id="screenGame">
+        <div class="card" id="card">
+          <div class="levelBadge" id="levelBadge">
+            <div class="levelNumber" id="levelNumber">1</div>
+            <div class="levelDifficulty" id="levelDifficulty">●</div>
+          </div>
+          <div class="cardTitle" id="lvlTag">Уровень</div>
+          <div class="cardText" id="lvlText">…</div>
+          <div class="cardSub" id="lvlSub">…</div>
+
+          <div class="overlay" id="overlay">
+            <div class="modal">
+              <div class="modalTitle" id="modalTitle">…</div>
+              <div class="modalText" id="modalText">…</div>
+              <div class="modalRule" id="modalRule">…</div>
+              <div class="modalBtns">
+                <button class="bigBtn primary" id="btnNext">Дальше</button>
+                <button class="bigBtn" id="btnRetry">Ещё раз</button>
+                <button class="bigBtn" id="btnMenu">В меню</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btnRow" id="btnRow"></div>
+
+        <div class="footerHint" id="footerHint">
+          Если застрял — ошибись дважды, и появится подсказка.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.expand();
+        tg.ready();
+        try { tg.BackButton.hide(); } catch { }
+      }
+
+      // ---------- Audio (SFX) ----------
+      let audioCtx = null;
+      function ensureAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      function beep(freq = 440, durMs = 80, type = "sine", gain = 0.05) {
+        if (!settings.sfx) return;
+        try {
+          ensureAudio();
+          const t0 = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.value = freq;
+          g.gain.value = gain;
+          osc.connect(g);
+          g.connect(audioCtx.destination);
+          osc.start(t0);
+          osc.stop(t0 + durMs / 1000);
+        } catch { }
+      }
+
+      // ---------- TTS ----------
+      function speak(text) {
+        if (!settings.tts) return;
+        if (!("speechSynthesis" in window)) return;
+        try {
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = "ru-RU";
+          u.rate = 1.05;
+          u.pitch = 1.0;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(u);
+        } catch { }
+      }
+
+      // ---------- UI refs ----------
+      const screenModeSelect = document.getElementById("screenModeSelect");
+      const screenDifficultySelect = document.getElementById("screenDifficultySelect");
+      const screenSettings = document.getElementById("screenSettings");
+      const screenGame = document.getElementById("screenGame");
+
+      const topSub = document.getElementById("topSub");
+      const pillProgress = document.getElementById("pillProgress");
+      const pillHint = document.getElementById("pillHint");
+      const pillMenu = document.getElementById("pillMenu");
+
+      const modeList = document.getElementById("modeList");
+      const difficultyList = document.getElementById("difficultyList");
+      const selectedModeTitle = document.getElementById("selectedModeTitle");
+      const selectedModeDesc = document.getElementById("selectedModeDesc");
+
+      const btnSettings = document.getElementById("btnSettings");
+      const btnBackToModes = document.getElementById("btnBackToModes");
+      const btnBackFromSettings = document.getElementById("btnBackFromSettings");
+      const btnResetAll = document.getElementById("btnResetAll");
+
+      const card = document.getElementById("card");
+      const lvlTag = document.getElementById("lvlTag");
+      const lvlText = document.getElementById("lvlText");
+      const lvlSub = document.getElementById("lvlSub");
+      const levelNumber = document.getElementById("levelNumber");
+      const levelDifficulty = document.getElementById("levelDifficulty");
+      const btnRow = document.getElementById("btnRow");
+      const footerHint = document.getElementById("footerHint");
+
+      const overlay = document.getElementById("overlay");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalText = document.getElementById("modalText");
+      const modalRule = document.getElementById("modalRule");
+      const btnNext = document.getElementById("btnNext");
+      const btnRetry = document.getElementById("btnRetry");
+      const btnMenu = document.getElementById("btnMenu");
+
+      const swSfx = document.getElementById("swSfx");
+      const swTts = document.getElementById("swTts");
+
+      // ---------- Settings ----------
+      const settings = {
+        sfx: localStorage.getItem("yo_sfx") !== "0",
+        tts: localStorage.getItem("yo_tts") === "1"
+      };
+      function syncSwitches() {
+        swSfx.classList.toggle("on", settings.sfx);
+        swSfx.setAttribute("aria-checked", settings.sfx ? "true" : "false");
+        swTts.classList.toggle("on", settings.tts);
+        swTts.setAttribute("aria-checked", settings.tts ? "true" : "false");
+      }
+      syncSwitches();
+
+      function toggleSwitch(key) {
+        settings[key] = !settings[key];
+        localStorage.setItem(key === "sfx" ? "yo_sfx" : "yo_tts", settings[key] ? "1" : "0");
+        syncSwitches();
+        beep(settings[key] ? 720 : 360, 70, "triangle", 0.05);
+      }
+      swSfx.addEventListener("click", () => toggleSwitch("sfx"));
+      swTts.addEventListener("click", () => toggleSwitch("tts"));
+
+      // ---------- Levels ----------
+      // option flags:
+      // - passive:true  => click doesn't fail, but counts toward hint tries
+      // - disabled:true => same, but shows "disabled"
+      const LEVELS = [
+        {
+          id: 1, diff: "Плут", tag: "Разогрев",
+          text: "Начнём просто. Выбери вариант, который звучит нормально.",
+          sub: "Иногда игра не троллит. Иногда.",
+          options: [
+            { text: "верю", style: { tone: "blue", weight: 900 } },
+            { text: "возможно", style: { tone: "green", weight: 800 } },
+            { text: "???", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 0 },
+          hints: ["Сейчас без хитростей. Просто выбери самый адекватный вариант.", "Нажми «верю»."],
+          fail: { why: "Здесь подвоха не было.", clue: "Намёк был в тексте: «Начнём просто»." }
+        },
+        {
+          id: 2, diff: "Плут", tag: "Позиция",
+          text: "Средний путь — удобный. Поэтому сегодня он запрещён.",
+          sub: "Иногда правило прямо в тексте.",
+          options: [
+            { text: "левый", style: { tone: "green", weight: 900 } },
+            { text: "средний", style: { tone: "blue", weight: 900 } },
+            { text: "правый", style: { tone: "green", weight: 900 } }
+          ],
+          solution: { kind: "tapAnyExcept", index: 1 },
+          hints: ["Запрет связан с расположением.", "Нельзя нажимать средний вариант."],
+          fail: { why: "Правило уровня: запрещён средний вариант.", clue: "Намёк был в первой строке: «Средний путь… запрещён»." }
+        },
+        {
+          id: 3, diff: "Плут", tag: "Цвет",
+          text: "«Красный флаг» — это предупреждение. Не игнорируй предупреждения.",
+          sub: "Смотри на цвет кнопок.",
+          options: [
+            { text: "да", style: { tone: "blue", weight: 950 } },
+            { text: "нет", style: { tone: "red", weight: 950 } },
+            { text: "не уверен", style: { tone: "green", weight: 850 } }
+          ],
+          solution: { kind: "tap", index: 0 },
+          hints: ["Один вариант выглядит как явное «предупреждение».", "Красный здесь плохая идея."],
+          fail: { why: "Правило уровня: красный — приманка. Не нажимай красное.", clue: "Намёк был в фразе «красный флаг» + цвете кнопки." }
+        },
+        {
+          id: 4, diff: "Плут", tag: "Шрифт",
+          text: "Курсив — это намёк. Иногда самый честный намёк.",
+          sub: "Один вариант написан иначе.",
+          options: [
+            { text: "обычный", style: { tone: "blue", weight: 900 } },
+            { text: "курсив", style: { tone: "green", weight: 900, italic: true } },
+            { text: "обычный", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Ищи отличие в типографике.", "Нажми вариант курсивом."],
+          fail: { why: "Правило уровня: выбери вариант, который выделяется стилем.", clue: "Намёк в тексте: «Курсив — это намёк»." }
+        },
+        {
+          id: 5, diff: "Плут", tag: "Двойной тап",
+          text: "Дважды проверяй. Особенно здесь.",
+          sub: "Иногда один тап — ошибка.",
+          options: [
+            { text: "проверил", style: { tone: "blue", weight: 950 } },
+            { text: "не проверил", style: { tone: "red", weight: 900 } },
+            { text: "назад", style: { tone: "gray", weight: 850 }, passive: true }
+          ],
+          solution: { kind: "doubleTap", index: 0 },
+          hints: ["Ключевое слово: «Дважды».", "Нужно нажать «проверил» два раза подряд."],
+          fail: { why: "Правило уровня: нужен двойной тап по правильной кнопке.", clue: "Намёк в первой строке: «Дважды проверяй»." }
+        },
+        {
+          id: 6, diff: "Плут", tag: "Пауза",
+          text: "Иногда лучший ответ — тишина…",
+          sub: "Не трогай экран несколько секунд.",
+          options: [
+            { text: "ладно", style: { tone: "blue", weight: 900 } },
+            { text: "понял", style: { tone: "green", weight: 900 } },
+            { text: "ок", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "wait", ms: 6000 },
+          hints: ["Этот уровень решается без нажатий.", "Просто не трогай экран ~6 секунд."],
+          fail: { why: "Правило уровня: нужно было подождать и не нажимать ничего.", clue: "Намёк в тексте: «тишина…» + подсказка снизу." }
+        },
+        {
+          id: 7, diff: "Плут", tag: "Не туда",
+          text: "Иногда отвечают не кнопки, а текст.",
+          sub: "Попробуй нажать на подчёркнутые слова: ",
+          options: [
+            { text: "да", style: { tone: "blue", weight: 900 } },
+            { text: "нет", style: { tone: "red", weight: 900 } },
+            { text: "может", style: { tone: "green", weight: 900 } }
+          ],
+          solution: { kind: "tapCard" },
+          hints: ["Ответ не на кнопках.", "Нажми на текст карточки (подчёркнутое)."],
+          fail: { why: "Правило уровня: нужно было нажать на текст карточки, а не на варианты.", clue: "Намёк: «не кнопки, а текст»." }
+        },
+        {
+          id: 8, diff: "Плут", tag: "Язык",
+          text: "Иногда правильный ответ — тот, который «свой».",
+          sub: "Выбирай кириллицу.",
+          options: [
+            { text: "YES", style: { tone: "red", weight: 950 } },
+            { text: "ДА", style: { tone: "green", weight: 950 } },
+            { text: "OK", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Посмотри на алфавит.", "Кириллица — правильный выбор."],
+          fail: { why: "Правило уровня: выбирай вариант на кириллице.", clue: "Намёк: «свой» + «Выбирай кириллицу»." }
+        },
+        {
+          id: 9, diff: "Плут", tag: "Коротко",
+          text: "Если сомневаешься — отвечай коротко.",
+          sub: "Самый короткий вариант выигрывает.",
+          options: [
+            { text: "да", style: { tone: "blue", weight: 950 } },
+            { text: "возможно", style: { tone: "green", weight: 900 } },
+            { text: "абсолютно точно", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 0 },
+          hints: ["Правило связано с длиной текста на кнопке.", "Нажми самый короткий вариант."],
+          fail: { why: "Правило уровня: выбирай самый короткий вариант.", clue: "Намёк: «отвечай коротко»." }
+        },
+        {
+          id: 10, diff: "Плут", tag: "Память",
+          text: "Не повторяйся.",
+          sub: "Нельзя нажимать то же, что на прошлом уровне.",
+          options: [
+            { text: "левый", style: { tone: "blue", weight: 900 } },
+            { text: "средний", style: { tone: "green", weight: 900 } },
+            { text: "правый", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "sequence", indexes: [], withinMs: 999999, special: "noRepeatLast" },
+          hints: ["Вспомни, что ты нажал в прошлый раз.", "Нажми любой вариант, кроме предыдущего выбора."],
+          fail: { why: "Правило уровня: нельзя повторять прошлый выбор.", clue: "Намёк в тексте: «Не повторяйся»." }
+        },
+        {
+          id: 11, diff: "Обманщик", tag: "Жирный",
+          text: "Толстые намёки любят быть приманкой.",
+          sub: "Не ведись на слишком жирное.",
+          options: [
+            { text: "ОЧЕНЬ ВАЖНО", style: { tone: "red", weight: 950 } },
+            { text: "важно", style: { tone: "blue", weight: 800 } },
+            { text: "не важно", style: { tone: "green", weight: 800 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Самый агрессивный стиль — подозрителен.", "Не выбирай самый “кричащий” вариант."],
+          fail: { why: "Правило уровня: слишком «жирное/кричащее» — приманка.", clue: "Намёк: «Толстые намёки… приманка»." }
+        },
+        {
+          id: 12, diff: "Обманщик", tag: "Моноширинный",
+          text: "Если что-то «кодовое» — смотри на шрифт.",
+          sub: "Один вариант как из терминала.",
+          options: [
+            { text: "обычно", style: { tone: "blue", weight: 900 } },
+            { text: "`sudo`", style: { tone: "green", weight: 900, mono: true } },
+            { text: "обычно", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Ищи вариант, который выглядит «технически».", "Выбирай моноширинный."],
+          fail: { why: "Правило уровня: выбирай вариант с необычным шрифтом.", clue: "Намёк: «кодовое» + терминальный вид." }
+        },
+        {
+          id: 13, diff: "Обманщик", tag: "Последовательность",
+          text: "Читай справа налево.",
+          sub: "Сделай два нажатия: сначала правый, потом левый.",
+          options: [
+            { text: "лево", style: { tone: "blue", weight: 950 } },
+            { text: "центр", style: { tone: "red", weight: 900 } },
+            { text: "право", style: { tone: "green", weight: 950 } }
+          ],
+          solution: { kind: "sequence", indexes: [2, 0], withinMs: 1600 },
+          hints: ["Это уровень на порядок действий.", "Нужно: право → лево."],
+          fail: { why: "Правило уровня: последовательность «право → лево».", clue: "Намёк: «Читай справа налево»." }
+        },
+        {
+          id: 14, diff: "Обманщик", tag: "Удержание",
+          text: "Некоторые решения требуют терпения.",
+          sub: "Удерживай правильную кнопку.",
+          options: [
+            { text: "держу", style: { tone: "green", weight: 950 } },
+            { text: "нажму", style: { tone: "blue", weight: 900 } },
+            { text: "быстро", style: { tone: "red", weight: 900 } }
+          ],
+          solution: { kind: "hold", index: 0, ms: 900 },
+          hints: ["Тут нужен не тап, а удержание.", "Удерживай «держу» около секунды."],
+          fail: { why: "Правило уровня: нужно было удерживать кнопку.", clue: "Намёк: «требуют терпения» + слово «Удерживай»." }
+        },
+        {
+          id: 15, diff: "Обманщик", tag: "НЕ-слова",
+          text: "Отрицание — плохой проводник.",
+          sub: "Не выбирай вариант с «не».",
+          options: [
+            { text: "не верю", style: { tone: "red", weight: 950 } },
+            { text: "верю", style: { tone: "blue", weight: 950 } },
+            { text: "не знаю", style: { tone: "green", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Запрет связан со словом «не».", "Выбирай единственный вариант без «не»."],
+          fail: { why: "Правило уровня: нельзя выбирать варианты с отрицанием «не».", clue: "Намёк в тексте: «Отрицание…»." }
+        },
+        {
+          id: 16, diff: "Обманщик", tag: "Позиция 2",
+          text: "Края — безопаснее. Центр любит ловушки.",
+          sub: "Сегодня центр — ошибка.",
+          options: [
+            { text: "край", style: { tone: "green", weight: 950 } },
+            { text: "центр", style: { tone: "blue", weight: 950 } },
+            { text: "край", style: { tone: "green", weight: 950 } }
+          ],
+          solution: { kind: "tapAnyExcept", index: 1 },
+          hints: ["Запрет — по позиции.", "Не нажимай средний вариант."],
+          fail: { why: "Правило уровня: запрещён центр.", clue: "Намёк: «Центр любит ловушки»." }
+        },
+        {
+          id: 17, diff: "Локи", tag: "Без подвоха",
+          text: "Вода мокрая.",
+          sub: "Иногда всё правда просто.",
+          options: [
+            { text: "правда", style: { tone: "blue", weight: 950 } },
+            { text: "ложь", style: { tone: "red", weight: 950 } },
+            { text: "не знаю", style: { tone: "green", weight: 900 } }
+          ],
+          solution: { kind: "meaning", correctIndex: 0 },
+          hints: ["Подвоха может не быть.", "Ответь по смыслу."],
+          fail: { why: "Здесь подвоха не было: нужно было ответить по смыслу.", clue: "Намёк: «Иногда всё правда просто»." }
+        },
+        {
+          id: 18, diff: "Локи", tag: "Паранойя",
+          text: "Если вариант выглядит слишком правильным — проверь, не приманка ли это.",
+          sub: "Смотри на цвет и на текст.",
+          options: [
+            { text: "точно да", style: { tone: "red", weight: 950 } },
+            { text: "да", style: { tone: "blue", weight: 950 } },
+            { text: "да…", style: { tone: "green", weight: 900, italic: true } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Слишком яркий/агрессивный вариант может быть приманкой.", "Не выбирай красный. Возьми спокойный вариант."],
+          fail: { why: "Правило уровня: красный — приманка (слишком «правильно» выглядит).", clue: "Намёк: «слишком правильным» + красный цвет." }
+        },
+        {
+          id: 19, diff: "Хаос", tag: "Двойной подвох",
+          text: "Дважды… но не на красном флаге.",
+          sub: "Тут две подсказки сразу (и обе честные).",
+          options: [
+            { text: "проверил", style: { tone: "blue", weight: 950 } },
+            { text: "проверил", style: { tone: "red", weight: 950 } },
+            { text: "пропустить", style: { tone: "gray", weight: 900 }, passive: true }
+          ],
+          solution: { kind: "combo", parts: [{ kind: "doubleTap", index: 0 }, { kind: "forbidColor", color: "red" }] },
+          hints: ["Тут важны и «дважды», и цвет.", "Двойной тап нужен по НЕ красной кнопке."],
+          fail: { why: "Правило уровня: двойной тап + красный запрещён (приманка).", clue: "Намёк: «Дважды…» и «красном флаге»." }
+        },
+        {
+          id: 20, diff: "Финал", tag: "Мета",
+          text: "Выбери то, что обычно скрывают.",
+          sub: "Иногда ответ — это слово, которое неприятно видеть.",
+          options: [
+            { text: "я прав", style: { tone: "red", weight: 900 } },
+            { text: "ты ошибся", style: { tone: "green", weight: 950 } },
+            { text: "всё сложно", style: { tone: "blue", weight: 900 } }
+          ],
+          solution: { kind: "tap", index: 1 },
+          hints: ["Ищи «неприятную правду».", "Нажми «ты ошибся»."],
+          fail: { why: "Правило уровня: выбери вариант, который признаёт ошибку.", clue: "Намёк: «обычно скрывают»." }
+        },
+      ];
+
+      // ---------- Game Modes & Difficulties ----------
+      const GAME_MODES = [
+        {
+          id: "quick",
+          name: "⚡ Быстрая игра",
+          icon: "⚡",
+          desc: "5 уровней • 3-4 минуты",
+          levels: 5,
+          badge: "Разминка"
+        },
+        {
+          id: "classic",
+          name: "🎯 Классика",
+          icon: "🎯",
+          desc: "10 уровней • 6-8 минут",
+          levels: 10,
+          badge: "Рекомендуем"
+        },
+        {
+          id: "marathon",
+          name: "🔥 Марафон",
+          icon: "🔥",
+          desc: "15 уровней • 10-12 минут",
+          levels: 15,
+          badge: "Вызов"
+        },
+        {
+          id: "endless",
+          name: "∞ Бесконечный",
+          icon: "∞",
+          desc: "До 3 ошибок",
+          levels: Infinity,
+          badge: "Хардкор",
+          lives: 3
+        }
+      ];
+
+      const DIFFICULTIES = [
+        {
+          id: "easy",
+          name: "● Легко",
+          icon: "●",
+          desc: "Для новичков",
+          color: "#4ade80",
+          filter: (lvl) => lvl.id <= 7
+        },
+        {
+          id: "medium",
+          name: "●● Средне",
+          icon: "●●",
+          desc: "Сбалансированно",
+          color: "#fbbf24",
+          filter: (lvl) => lvl.id >= 8 && lvl.id <= 14
+        },
+        {
+          id: "hard",
+          name: "●●● Сложно",
+          icon: "●●●",
+          desc: "Для опытных",
+          color: "#f87171",
+          filter: (lvl) => lvl.id >= 15
+        },
+        {
+          id: "mix",
+          name: "🎲 Микс",
+          icon: "🎲",
+          desc: "Случайная сложность",
+          color: "#a78bfa",
+          filter: (lvl) => true
+        }
+      ];
+
+      // ---------- Apply option styles ----------
+      function applyOptionStyle(btn, style) {
+        btn.classList.remove("blue", "green", "red", "gray");
+        const tone = style?.tone || "gray";
+        btn.classList.add(tone);
+
+        btn.style.fontWeight = style?.weight ? String(style.weight) : "";
+        btn.style.fontStyle = style?.italic ? "italic" : "normal";
+        btn.style.letterSpacing = style?.spacing ? style.spacing : "";
+        btn.style.textTransform = style?.upper ? "uppercase" : "none";
+        btn.style.fontFamily = style?.mono
+          ? 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace'
+          : '';
+      }
+
+      // ---------- State ----------
+      const state = {
+        selectedMode: localStorage.getItem("yo_last_mode") || "classic",
+        selectedDifficulty: localStorage.getItem("yo_last_difficulty") || "easy",
+        playlist: [],
+        playPos: 0,
+
+        attemptsOnLevel: 0, // фейлы
+        hintTries: 0,
+        hintStep: 0,
+
+        resolved: false,
+
+        lastTapAt: [0, 0, 0],
+        seqPos: 0,
+        seqLastAt: 0,
+
+        waiting: false,
+        waitTimer: null,
+        resolved: false,
+
+        lastChoiceIndex: null
+      };
+
+      const ui = {
+        choiceButtons: [],
+        footerBase: "",
+        footerTimer: null
+      };
+
+      function progressKey(modeId) { return `yo_progress_v2_${modeId}`; }
+
+      function loadProgress(modeId) {
+        const saved = localStorage.getItem(progressKey(modeId));
+        if (!saved) return null;
+        try {
+          const p = JSON.parse(saved);
+          return {
+            playPos: Math.max(0, Number(p.playPos || 0)),
+            lastChoiceIndex: (p.lastChoiceIndex === null || p.lastChoiceIndex === undefined) ? null : Number(p.lastChoiceIndex)
+          };
+        } catch {
+          return null;
+        }
+      }
+
+      function saveProgress() {
+        localStorage.setItem(progressKey(state.modeId), JSON.stringify({
+          playPos: state.playPos,
+          lastChoiceIndex: state.lastChoiceIndex
+        }));
+        localStorage.setItem("yo_last_mode", state.modeId);
+      }
+
+      function resetModeProgress(modeId) {
+        localStorage.removeItem(progressKey(modeId));
+      }
+
+      function resetAllProgress() {
+        for (const d of DIFFICULTIES) localStorage.removeItem(progressKey(d.id));
+        localStorage.removeItem("yo_last_mode");
+      }
+
+      // ---------- Screen switching ----------
+      function hideAllScreens() {
+        screenModeSelect.classList.remove("on");
+        screenDifficultySelect.classList.remove("on");
+        screenSettings.classList.remove("on");
+        screenGame.classList.remove("on");
+      }
+
+      function showModeSelect() {
+        hideAllScreens();
+        screenModeSelect.classList.add("on");
+        pillProgress.textContent = "—";
+        pillProgress.style.setProperty('--progress', '0%');
+        pillHint.classList.add("dim");
+        pillMenu.style.display = "none";
+        topSub.textContent = "Выбери режим";
+
+        renderModeList();
+
+        try { tg?.BackButton?.hide(); } catch { }
+      }
+
+      function showDifficultySelect(modeId) {
+        hideAllScreens();
+        screenDifficultySelect.classList.add("on");
+
+        const mode = GAME_MODES.find(m => m.id === modeId);
+        if (mode) {
+          selectedModeTitle.textContent = mode.name;
+          selectedModeDesc.textContent = mode.desc;
+          state.selectedMode = modeId;
+          localStorage.setItem("yo_last_mode", modeId);
+        }
+
+        renderDifficultyList();
+
+        try { tg?.BackButton?.hide(); } catch { }
+      }
+
+      function showSettings() {
+        hideAllScreens();
+        screenSettings.classList.add("on");
+        topSub.textContent = "Настройки";
+      }
+
+      function showGame() {
+        hideAllScreens();
+        screenGame.classList.add("on");
+        pillHint.classList.remove("dim");
+        pillMenu.style.display = "block";
+
+        try {
+          tg?.BackButton?.show();
+          tg.BackButton.onClick(() => showModeSelect());
+        } catch { }
+      }
+
+      // ---------- Overlay ----------
+      function openOverlay({
+        title,
+        text,
+        rule,
+        tone = "neutral", // success | fail | hint | neutral
+        showNext = false,
+        nextLabel = "Дальше",
+        retryLabel = "Ещё раз",
+        showRetry = true,
+        showMenuBtn = true
+      }) {
+        overlay.classList.add("on");
+        modalTitle.textContent = title;
+        modalText.textContent = text;
+        modalRule.textContent = rule || "";
+
+        btnNext.textContent = nextLabel;
+        btnRetry.textContent = retryLabel;
+
+        btnNext.style.display = showNext ? "block" : "none";
+        btnRetry.style.display = showRetry ? "block" : "none";
+        btnMenu.style.display = showMenuBtn ? "block" : "none";
+
+        if (tone === "success") {
+          beep(880, 70, "triangle", 0.06);
+          beep(1200, 55, "triangle", 0.05);
+          speak("Прошёл.");
+          try { tg?.HapticFeedback?.notificationOccurred?.("success"); } catch { }
+        } else if (tone === "fail") {
+          beep(210, 100, "sawtooth", 0.05);
+          speak("Ты ошибся.");
+          try { tg?.HapticFeedback?.notificationOccurred?.("error"); } catch { }
+          card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+        } else if (tone === "hint") {
+          beep(660, 70, "triangle", 0.04);
+          speak("Подсказка.");
+          try { tg?.HapticFeedback?.impactOccurred?.("light"); } catch { }
+        }
+      }
+      function closeOverlay() { overlay.classList.remove("on"); }
+
+      // ---------- Footer helpers ----------
+      function setFooterBaseMessage(msg) {
+        ui.footerBase = msg;
+        footerHint.textContent = msg;
+      }
+      function setFooterTemp(msg, ms = 1200) {
+        if (ui.footerTimer) clearTimeout(ui.footerTimer);
+        footerHint.textContent = msg;
+        ui.footerTimer = setTimeout(() => {
+          footerHint.textContent = ui.footerBase;
+          ui.footerTimer = null;
+        }, ms);
+      }
+
+      // ---------- Hint ----------
+      function hintAvailable() { return state.hintTries >= 2; }
+
+      function updateHintPill() {
+        pillHint.classList.toggle("dim", !hintAvailable());
+      }
+
+      function showHint() {
+        const lvl = getCurrentLevel();
+        if (!lvl) return;
+
+        if (!hintAvailable()) {
+          beep(300, 70, "square", 0.03);
+          openOverlay({
+            title: "Подсказка недоступна",
+            text: "Сначала попробуй пару раз. Подсказка откроется после 2 попыток на этом уровне.",
+            rule: "Попытки считаются и при «пустых» нажатиях на пассивные кнопки.",
+            tone: "neutral",
+            showNext: false,
+            retryLabel: "Ок",
+            showMenuBtn: true
+          });
+          return;
+        }
+
+        const step = Math.min(state.hintStep, (lvl.hints?.length || 1) - 1);
+        const hintText = (lvl.hints && lvl.hints[step]) ? lvl.hints[step] : "Смотри внимательнее.";
+        state.hintStep = Math.min(state.hintStep + 1, (lvl.hints?.length || 1));
+
+        openOverlay({
+          title: "Подсказка",
+          text: hintText,
+          rule: "Подсказки в тестовой версии бесплатные.",
+          tone: "hint",
+          showNext: false,
+          retryLabel: "Закрыть",
+          showMenuBtn: true
+        });
+      }
+
+      pillHint.addEventListener("click", () => {
+        if (screenGame.classList.contains("on")) showHint();
+      });
+
+      pillMenu.addEventListener("click", () => {
+        if (screenGame.classList.contains("on")) {
+          beep(520, 60, "triangle", 0.04);
+          showMenu();
+        }
+      });
+
+      // ---------- Wait ----------
+      function clearWait() {
+        state.waiting = false;
+        if (state.waitTimer) {
+          clearTimeout(state.waitTimer);
+          state.waitTimer = null;
+        }
+      }
+      function onUserInteraction() {
+        if (state.waiting && !state.resolved) failLevel("Touched during wait");
+      }
+
+      // ---------- clue highlight ----------
+      function clearFlashes() {
+        card.classList.remove("cardFlash");
+        for (const b of ui.choiceButtons) b.classList.remove("flashOk", "flashBad", "flashSoft");
+      }
+      function flashBtn(index, kind) {
+        const b = ui.choiceButtons[index];
+        if (!b) return;
+        const cls = kind === "ok" ? "flashOk" : kind === "bad" ? "flashBad" : "flashSoft";
+        b.classList.remove("flashOk", "flashBad", "flashSoft");
+        void b.offsetWidth;
+        b.classList.add(cls);
+        setTimeout(() => b.classList.remove(cls), 950);
+      }
+      function flashCard() {
+        card.classList.remove("cardFlash"); void card.offsetWidth;
+        card.classList.add("cardFlash");
+        setTimeout(() => card.classList.remove("cardFlash"), 950);
+      }
+      function isCyrillicText(s) {
+        return /[А-Яа-яЁё]/.test(String(s || ""));
+      }
+
+      function revealClue(lvl) {
+        clearFlashes();
+
+        const sol = lvl.solution;
+        const clueText = (lvl.fail?.clue || "").toLowerCase();
+        const whyText = (lvl.fail?.why || "").toLowerCase();
+
+        if (clueText.includes("сред") || clueText.includes("центр") || whyText.includes("сред") || whyText.includes("центр")) {
+          flashBtn(1, "bad");
+        }
+
+        const forbidRedByText = clueText.includes("красн") || whyText.includes("красн");
+        if (forbidRedByText) {
+          for (let i = 0; i < lvl.options.length; i++) {
+            if ((lvl.options[i]?.style?.tone || "") === "red") flashBtn(i, "bad");
+          }
+        }
+
+        if (clueText.includes("курсив")) {
+          const i = lvl.options.findIndex(o => o?.style?.italic);
+          if (i >= 0) flashBtn(i, "ok");
+        }
+
+        if (clueText.includes("моно") || clueText.includes("термин")) {
+          const i = lvl.options.findIndex(o => o?.style?.mono);
+          if (i >= 0) flashBtn(i, "ok");
+        }
+
+        if (clueText.includes("кирил")) {
+          const i = lvl.options.findIndex(o => isCyrillicText(o?.text));
+          if (i >= 0) flashBtn(i, "ok");
+        }
+
+        if (clueText.includes("коротк") || whyText.includes("коротк")) {
+          let bestI = 0;
+          let bestLen = Infinity;
+          for (let i = 0; i < lvl.options.length; i++) {
+            const len = String(lvl.options[i]?.text || "").length;
+            if (len < bestLen) { bestLen = len; bestI = i; }
+          }
+          flashBtn(bestI, "ok");
+        }
+
+        if (sol.kind === "tap") {
+          flashBtn(sol.index, "ok");
+        } else if (sol.kind === "tapAnyExcept") {
+          flashBtn(sol.index, "bad");
+        } else if (sol.kind === "doubleTap") {
+          flashBtn(sol.index, "ok"); flashBtn(sol.index, "soft");
+        } else if (sol.kind === "hold") {
+          flashBtn(sol.index, "ok"); flashBtn(sol.index, "soft");
+        } else if (sol.kind === "sequence") {
+          if (sol.special === "noRepeatLast") {
+            if (state.lastChoiceIndex !== null) flashBtn(state.lastChoiceIndex, "bad");
+          } else if (Array.isArray(sol.indexes)) {
+            sol.indexes.forEach((idx, k) => setTimeout(() => flashBtn(idx, "ok"), 120 + k * 250));
+          }
+        } else if (sol.kind === "tapCard") {
+          flashCard();
+        } else if (sol.kind === "wait") {
+          flashCard();
+        } else if (sol.kind === "combo") {
+          const forbid = sol.parts?.find(p => p.kind === "forbidColor");
+          if (forbid?.color) {
+            for (let i = 0; i < lvl.options.length; i++) {
+              if ((lvl.options[i]?.style?.tone || "") === forbid.color) flashBtn(i, "bad");
+            }
+          }
+          const dt = sol.parts?.find(p => p.kind === "doubleTap");
+          if (dt?.index !== undefined) flashBtn(dt.index, "ok");
+        } else if (sol.kind === "meaning") {
+          flashBtn(sol.correctIndex, "ok");
+        }
+      }
+
+      // ---------- Passive/disabled logic ----------
+      function isIndexRequiredBySolution(sol, index) {
+        if (!sol) return false;
+        if (sol.kind === "tap") return sol.index === index;
+        if (sol.kind === "doubleTap") return sol.index === index;
+        if (sol.kind === "hold") return sol.index === index;
+        if (sol.kind === "meaning") return sol.correctIndex === index;
+        if (sol.kind === "sequence" && !sol.special) return Array.isArray(sol.indexes) && sol.indexes.includes(index);
+        if (sol.kind === "combo") {
+          const dt = sol.parts?.find(p => p.kind === "doubleTap");
+          if (dt && dt.index === index) return true;
+        }
+        return false;
+      }
+
+      function nonFailTapFeedback(kind, index) {
+        state.hintTries += 1;
+        updateHintPill();
+
+        flashBtn(index, "soft");
+        try { tg?.HapticFeedback?.impactOccurred?.("light"); } catch { }
+
+        if (kind === "disabled") {
+          beep(260, 55, "square", 0.03);
+          setFooterTemp("Эта кнопка сейчас не активна.");
+        } else {
+          beep(320, 55, "triangle", 0.03);
+          setFooterTemp("Эта кнопка ничего не делает.");
+        }
+      }
+
+      // ---------- Core game flow ----------
+      function getCurrentLevel() {
+        const lvlIndex = state.playlist[state.playPos];
+        if (lvlIndex === undefined) return null;
+        return LEVELS[lvlIndex] || null;
+      }
+
+      function computeFooterBase(lvl) {
+        if (!lvl) return "";
+        if (lvl.solution.kind === "wait") return "Не трогай экран…";
+        return hintAvailable()
+          ? "Подсказка доступна по кнопке “?” сверху."
+          : "Подсказка откроется после 2 попыток на уровне.";
+      }
+
+      // Fail message titles variety
+      const FAIL_TITLES = [
+        "Ты ошибся",
+        "Неверно",
+        "Мимо",
+        "Не то",
+        "Ошибка",
+        "Попался",
+        "Не угадал",
+        "Промах",
+        "Нет",
+        "Провал",
+        "Не прошло",
+        "Попробуй ещё"
+      ];
+
+      function failLevel(_reason) {
+        state.attemptsOnLevel += 1;
+        state.hintTries += 1;
+        updateHintPill();
+
+        state.resolved = true;
+        clearWait();
+
+        const lvl = getCurrentLevel();
+        if (!lvl) return;
+
+        // Pick random fail title
+        const failTitle = FAIL_TITLES[Math.floor(Math.random() * FAIL_TITLES.length)];
+
+        // Show clue only after 2+ attempts on this level
+        const showClue = state.attemptsOnLevel >= 2;
+        const clueText = showClue && lvl.fail?.clue
+          ? ("Где был намёк: " + lvl.fail.clue)
+          : "";
+
+        openOverlay({
+          title: failTitle,
+          text: lvl.fail?.why || "Было запрещённое действие.",
+          rule: clueText,
+          tone: "fail",
+          showNext: false,
+          retryLabel: "Ещё раз",
+          showRetry: true,
+          showMenuBtn: true
+        });
+
+        setTimeout(() => revealClue(lvl), 60);
+      }
+
+      // Success messages variety
+      const SUCCESS_MESSAGES = [
+        { title: "Верно", text: "Ты не ошибся. На этот раз.", rule: "Двигаемся дальше." },
+        { title: "Молодец", text: "Правило разгадано. Но это было легко.", rule: "Следующий уровень сложнее." },
+        { title: "Неплохо", text: "Ты справился. Пока везёт.", rule: "Не расслабляйся." },
+        { title: "Точно", text: "Именно так и нужно было.", rule: "Продолжаем." },
+        { title: "Угадал", text: "Или понял? В любом случае — засчитано.", rule: "Идём дальше." },
+        { title: "Правильно", text: "Ты начинаешь понимать логику.", rule: "Или просто везёт?" },
+        { title: "Прошёл", text: "Этот уровень позади.", rule: "Впереди новые ловушки." },
+        { title: "Отлично", text: "Ты видишь скрытые правила.", rule: "Так держать." },
+        { title: "Верный путь", text: "Ты на правильном пути.", rule: "Пока." },
+        { title: "Засчитано", text: "Уровень пройден без ошибок.", rule: "Редкость." },
+        { title: "Успех", text: "Ты не попался на приманку.", rule: "В этот раз." },
+        { title: "Чисто", text: "Без единой ошибки.", rule: "Впечатляет." },
+        { title: "Понял суть", text: "Ты разгадал механику.", rule: "Следующая будет хитрее." },
+        { title: "Прорыв", text: "Ты учишься быстро.", rule: "Посмотрим, как дальше." },
+        { title: "Идеально", text: "Безупречное прохождение.", rule: "Так бывает нечасто." }
+      ];
+
+      function passLevel() {
+        state.resolved = true;
+        clearWait();
+
+        // Pick random success message
+        const msg = SUCCESS_MESSAGES[Math.floor(Math.random() * SUCCESS_MESSAGES.length)];
+
+        openOverlay({
+          title: msg.title,
+          text: msg.text,
+          rule: msg.rule,
+          tone: "success",
+          showNext: true,
+          nextLabel: "Дальше",
+          showRetry: false,
+          showMenuBtn: true
+        });
+      }
+
+      function installCardTapTarget(lvl) {
+        if (lvl.id !== 7) return;
+
+        const target = document.createElement("span");
+        target.className = "tapTarget";
+        target.textContent = "НАЖМИ МЕНЯ";
+
+        lvlSub.innerHTML = 'Попробуй нажать на подчёркнутые слова: ';
+        lvlSub.appendChild(target);
+
+        target.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleAction({ kind: "tapCard" });
+        }, { once: false });
+      }
+
+      function handleAction(action) {
+        if (state.resolved) return;
+
+        const lvl = getCurrentLevel();
+        if (!lvl) return;
+        const sol = lvl.solution;
+
+        if (sol.kind === "wait") { onUserInteraction(); return; }
+
+        if (action.kind === "tapCard") {
+          if (sol.kind === "tapCard") return passLevel();
+          return failLevel("Wrong target");
+        }
+
+        if (sol.kind === "meaning") {
+          if (action.kind === "tap" && action.index === sol.correctIndex) {
+            state.lastChoiceIndex = action.index;
+            saveProgress();
+            return passLevel();
+          }
+          return failLevel("Meaning wrong");
+        }
+
+        if (sol.kind === "combo") {
+          let tappedBtn = null;
+          if (action.kind === "tap" || action.kind === "doubleTap") tappedBtn = action;
+          if (!tappedBtn) return failLevel("Combo wrong action");
+
+          for (const p of sol.parts) {
+            if (p.kind === "forbidColor") {
+              const opt = lvl.options[tappedBtn.index];
+              const tone = opt?.style?.tone || "gray";
+              if (tone === p.color) return failLevel("Forbidden color");
+            }
+          }
+          for (const p of sol.parts) {
+            if (p.kind === "doubleTap") {
+              if (tappedBtn.kind !== "doubleTap") return failLevel("Need double tap");
+              if (tappedBtn.index !== p.index) return failLevel("Wrong index");
+            }
+          }
+          state.lastChoiceIndex = tappedBtn.index;
+          saveProgress();
+          return passLevel();
+        }
+
+        if (sol.kind === "tapAnyExcept") {
+          if (action.kind === "tap" && action.index !== sol.index) {
+            state.lastChoiceIndex = action.index;
+            saveProgress();
+            return passLevel();
+          }
+          return failLevel("Forbidden index");
+        }
+
+        if (sol.kind === "tap") {
+          if (action.kind === "tap" && action.index === sol.index) {
+            state.lastChoiceIndex = action.index;
+            saveProgress();
+            return passLevel();
+          }
+          return failLevel("Wrong tap");
+        }
+
+        if (sol.kind === "doubleTap") {
+          if (action.kind === "doubleTap" && action.index === sol.index) {
+            state.lastChoiceIndex = action.index;
+            saveProgress();
+            return passLevel();
+          }
+          return failLevel("Need double tap");
+        }
+
+        if (sol.kind === "hold") {
+          if (action.kind === "hold" && action.index === sol.index && action.msHeld >= sol.ms) {
+            state.lastChoiceIndex = action.index;
+            saveProgress();
+            return passLevel();
+          }
+          return failLevel("Need hold");
+        }
+
+        if (sol.kind === "sequence") {
+          if (sol.special === "noRepeatLast") {
+            if (action.kind !== "tap") return failLevel("Need tap");
+            if (state.lastChoiceIndex !== null && action.index === state.lastChoiceIndex) {
+              return failLevel("Repeated last");
+            }
+            state.lastChoiceIndex = action.index;
+            saveProgress();
+            return passLevel();
+          }
+
+          if (action.kind !== "tap") return failLevel("Need tap for sequence");
+
+          const now = performance.now();
+          if (state.seqPos > 0 && (now - state.seqLastAt) > sol.withinMs) state.seqPos = 0;
+
+          const expected = sol.indexes[state.seqPos];
+          if (action.index !== expected) {
+            state.seqPos = 0;
+            return failLevel("Wrong order");
+          }
+
+          state.seqPos += 1;
+          state.seqLastAt = now;
+
+          if (state.seqPos >= sol.indexes.length) {
+            state.seqPos = 0;
+            state.lastChoiceIndex = action.index;
+            saveProgress();
+            return passLevel();
+          }
+
+          beep(520, 60, "triangle", 0.03);
+          try { tg?.HapticFeedback?.impactOccurred?.("light"); } catch { }
+          setFooterTemp("Хорошо. Теперь второй шаг…", 900);
+          return;
+        }
+
+        return failLevel("Unknown");
+      }
+
+      function buildChoiceButtons(lvl) {
+        btnRow.innerHTML = "";
+        ui.choiceButtons = [];
+
+        for (let i = 0; i < lvl.options.length; i++) {
+          const opt = lvl.options[i];
+          const b = document.createElement("button");
+          b.className = "choice gray";
+          b.type = "button";
+          b.textContent = opt.text;
+          b.dataset.index = String(i);
+
+          applyOptionStyle(b, opt.style);
+
+          if (opt.passive) b.classList.add("passive");
+          if (opt.disabled) b.classList.add("disabled");
+
+          ui.choiceButtons.push(b);
+
+          b.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const cur = getCurrentLevel();
+            if (!cur) return;
+
+            if (cur.solution.kind === "wait") { onUserInteraction(); return; }
+
+            ensureAudio();
+            if (state.resolved) return;
+
+            const sol = cur.solution;
+
+            if ((opt.disabled || opt.passive) && !isIndexRequiredBySolution(sol, i)) {
+              nonFailTapFeedback(opt.disabled ? "disabled" : "passive", i);
+              return;
+            }
+
+            const now = performance.now();
+            const dt = now - state.lastTapAt[i];
+            state.lastTapAt[i] = now;
+
+            if (dt > 0 && dt < 320) {
+              handleAction({ kind: "doubleTap", index: i });
+              return;
+            }
+
+            if (sol.kind === "doubleTap" || (sol.kind === "combo" && sol.parts?.some(p => p.kind === "doubleTap"))) {
+              setTimeout(() => {
+                if (state.resolved) return;
+                const now2 = performance.now();
+                const dt2 = now2 - state.lastTapAt[i];
+                if (dt2 >= 320) handleAction({ kind: "tap", index: i });
+              }, 340);
+            } else {
+              handleAction({ kind: "tap", index: i });
+            }
+          });
+
+          // hold detection
+          let holdStart = 0;
+          let holding = false;
+
+          b.addEventListener("pointerdown", () => {
+            const cur = getCurrentLevel();
+            if (!cur) return;
+            if (cur.solution.kind === "wait") return;
+            if (state.resolved) return;
+
+            if ((opt.disabled || opt.passive) && !isIndexRequiredBySolution(cur.solution, i)) return;
+
+            holding = true;
+            holdStart = performance.now();
+          });
+
+          b.addEventListener("pointerup", () => {
+            if (!holding) return;
+            holding = false;
+            const msHeld = performance.now() - holdStart;
+
+            const cur = getCurrentLevel();
+            if (!cur) return;
+
+            if (cur.solution.kind === "hold") {
+              handleAction({ kind: "hold", index: i, msHeld });
+            }
+          });
+
+          b.addEventListener("pointercancel", () => { holding = false; });
+
+          btnRow.appendChild(b);
+        }
+      }
+
+      function renderLevel() {
+        closeOverlay();
+        clearFlashes();
+
+        state.resolved = false;
+        state.attemptsOnLevel = 0;
+        state.hintTries = 0;
+        state.hintStep = 0;
+        state.seqPos = 0;
+        state.seqLastAt = 0;
+        state.lastTapAt = [0, 0, 0];
+        clearWait();
+
+        const lvl = getCurrentLevel();
+        if (!lvl) {
+          // Playlist finished
+          const mode = GAME_MODES.find(m => m.id === state.selectedMode);
+          const modeName = mode ? mode.name : "Игра";
+
+          openOverlay({
+            title: "Поздравляем!",
+            text: `Вы прошли все уровни режима "${modeName}"!`,
+            rule: `Пройдено: ${state.playlist.length} уровней`,
+            tone: "success",
+            showNext: false,
+            retryLabel: "В меню",
+            showRetry: true,
+            showMenuBtn: false
+          });
+          return;
+        }
+
+        const mode = GAME_MODES.find(m => m.id === state.selectedMode);
+        const modeName = mode ? mode.icon + " " + mode.name.replace(/^[⚡🎯🔥∞]\s/, '') : "Игра";
+
+        lvlTag.textContent = `${modeName} • ${lvl.tag}`;
+        lvlText.textContent = lvl.text;
+        lvlSub.textContent = lvl.sub;
+
+        buildChoiceButtons(lvl);
+        installCardTapTarget(lvl);
+
+        pillProgress.textContent = `${state.playPos + 1}/${state.playlist.length}`;
+        topSub.textContent = `${modeName} • ${state.playPos + 1}/${state.playlist.length}`;
+
+        // Update progress indicator
+        const progressPercent = ((state.playPos + 1) / state.playlist.length) * 100;
+        pillProgress.style.setProperty('--progress', `${progressPercent}%`);
+
+        updateHintPill();
+        setFooterBaseMessage(computeFooterBase(lvl));
+
+        // Update level badge
+        levelNumber.textContent = lvl.id;
+        levelDifficulty.className = 'levelDifficulty';
+        if (lvl.id <= 7) {
+          levelDifficulty.classList.add('easy');
+          levelDifficulty.textContent = '●';
+        } else if (lvl.id <= 14) {
+          levelDifficulty.classList.add('medium');
+          levelDifficulty.textContent = '●●';
+        } else {
+          levelDifficulty.classList.add('hard');
+          levelDifficulty.textContent = '●●●';
+        }
+
+        // Trigger entrance animations
+        card.classList.remove('levelEnter');
+        void card.offsetWidth; // Force reflow
+        card.classList.add('levelEnter');
+
+        // Animate buttons with delay
+        setTimeout(() => {
+          ui.choiceButtons.forEach(btn => {
+            btn.classList.add('btnEnter');
+          });
+        }, 100);
+
+        if (lvl.solution.kind === "wait") {
+          state.waiting = true;
+          pillHint.classList.add("dim");
+          state.waitTimer = setTimeout(() => {
+            if (state.resolved) return;
+            state.resolved = true;
+            passLevel();
+          }, lvl.solution.ms);
+        }
+
+        speak("Уровень.");
+      }
+
+      function nextLevel() {
+        if (state.playPos < state.playlist.length - 1) {
+          state.playPos += 1;
+          saveProgress();
+          renderLevel();
+        } else {
+          finishMode();
+        }
+      }
+
+      function finishMode() {
+        showMenu();
+        topSub.textContent = "Готово";
+        beep(880, 80, "triangle", 0.06);
+        beep(660, 80, "triangle", 0.05);
+        speak("Финал.");
+        try {
+          tg?.sendData?.(JSON.stringify({ done: true, mode: state.modeId, levels: state.playlist.length, ts: Date.now() }));
+        } catch { }
+      }
+
+      function retryLevel() {
+        closeOverlay();
+        clearFlashes();
+
+        state.resolved = false;
+        state.seqPos = 0;
+        state.seqLastAt = 0;
+        state.lastTapAt = [0, 0, 0];
+        clearWait();
+
+        const lvl = getCurrentLevel();
+        if (!lvl) return;
+
+        setFooterBaseMessage(computeFooterBase(lvl));
+
+        if (lvl.solution.kind === "wait") {
+          state.waiting = true;
+          pillHint.classList.add("dim");
+          state.waitTimer = setTimeout(() => {
+            if (state.resolved) return;
+            state.resolved = true;
+            passLevel();
+          }, lvl.solution.ms);
+        }
+      }
+
+      // ---------- Menu: modes & difficulties ----------
+      function renderModeList() {
+        modeList.innerHTML = "";
+
+        for (const mode of GAME_MODES) {
+          const btn = document.createElement("button");
+          btn.className = "diffBtn";
+          btn.type = "button";
+
+          btn.innerHTML = `
+            <div class="diffTop">
+              <div class="diffName">${mode.name}<span class="badge">${mode.badge}</span></div>
+              <div class="diffMeta">${mode.levels === Infinity ? '∞' : mode.levels} ур.</div>
+            </div>
+            <div class="diffDesc">${mode.desc}</div>
+          `;
+
+          btn.addEventListener("click", () => {
+            beep(440, 60, "triangle", 0.04);
+            showDifficultySelect(mode.id);
+          });
+
+          modeList.appendChild(btn);
+        }
+      }
+
+      function renderDifficultyList() {
+        difficultyList.innerHTML = "";
+
+        for (const diff of DIFFICULTIES) {
+          const btn = document.createElement("button");
+          btn.className = "diffBtn";
+          btn.type = "button";
+
+          btn.innerHTML = `
+            <div class="diffTop">
+              <div class="diffName">${diff.name}</div>
+              <div class="diffMeta">${diff.desc}</div>
+            </div>
+          `;
+
+          btn.addEventListener("click", () => {
+            beep(520, 60, "triangle", 0.04);
+            state.selectedDifficulty = diff.id;
+            localStorage.setItem("yo_last_difficulty", diff.id);
+            startGame();
+          });
+
+          difficultyList.appendChild(btn);
+        }
+      }
+
+      function buildPlaylist() {
+        const mode = GAME_MODES.find(m => m.id === state.selectedMode);
+        const diff = DIFFICULTIES.find(d => d.id === state.selectedDifficulty);
+
+        if (!mode || !diff) return [];
+
+        // Get all levels matching difficulty
+        const matchingLevels = [];
+        for (let i = 0; i < LEVELS.length; i++) {
+          if (diff.filter(LEVELS[i])) {
+            matchingLevels.push(i);
+          }
+        }
+
+        // Shuffle and pick required amount
+        const shuffled = matchingLevels.sort(() => Math.random() - 0.5);
+        const count = mode.levels === Infinity ? shuffled.length : Math.min(mode.levels, shuffled.length);
+
+        return shuffled.slice(0, count);
+      }
+
+      function startGame() {
+        state.playlist = buildPlaylist();
+        state.playPos = 0;
+        state.lastChoiceIndex = null;
+
+        if (state.playlist.length === 0) {
+          alert("Нет доступных уровней для выбранной сложности!");
+          return;
+        }
+
+        showGame();
+        renderLevel();
+      }
+
+      // ---------- Buttons wiring ----------
+      btnNext.addEventListener("click", () => { closeOverlay(); nextLevel(); });
+
+      btnRetry.addEventListener("click", () => {
+        if (btnRetry.textContent === "Закрыть" || btnRetry.textContent === "Ок") {
+          closeOverlay();
+          return;
+        }
+        retryLevel();
+      });
+
+      btnMenu.addEventListener("click", () => { closeOverlay(); showModeSelect(); });
+
+      btnSettings.addEventListener("click", () => {
+        beep(440, 60, "triangle", 0.04);
+        showSettings();
+      });
+
+      btnBackToModes.addEventListener("click", () => {
+        beep(360, 60, "triangle", 0.04);
+        showModeSelect();
+      });
+
+      btnBackFromSettings.addEventListener("click", () => {
+        beep(360, 60, "triangle", 0.04);
+        showModeSelect();
+      });
+
+      btnResetAll.addEventListener("click", () => {
+        if (confirm("Сбросить весь прогресс?")) {
+          localStorage.clear();
+          beep(360, 80, "square", 0.04);
+          alert("Весь прогресс сброшен!");
+          showModeSelect();
+        }
+      });
+
+      document.addEventListener("pointerdown", () => {
+        const lvl = getCurrentLevel();
+        if (screenGame.classList.contains("on") && lvl?.solution?.kind === "wait") onUserInteraction();
+      }, { passive: true });
+
+      // ---------- Keyboard shortcuts ----------
+      document.addEventListener("keydown", (e) => {
+        // In game screen
+        if (screenGame.classList.contains("on")) {
+          // 1, 2, 3 - select answer
+          if (e.key >= '1' && e.key <= '3') {
+            const index = parseInt(e.key) - 1;
+            if (ui.choiceButtons[index] && !overlay.classList.contains("on")) {
+              e.preventDefault();
+              ui.choiceButtons[index].click();
+            }
+          }
+
+          // H - hint
+          if (e.key.toLowerCase() === 'h' && !overlay.classList.contains("on")) {
+            e.preventDefault();
+            showHint();
+          }
+
+          // Esc - menu
+          if (e.key === 'Escape' && !overlay.classList.contains("on")) {
+            e.preventDefault();
+            showMenu();
+          }
+        }
+
+        // In overlay (modal)
+        if (overlay.classList.contains("on")) {
+          // Space or Enter - next/retry
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            if (btnNext.style.display !== 'none') {
+              btnNext.click();
+            } else if (btnRetry.style.display !== 'none') {
+              btnRetry.click();
+            }
+          }
+
+          // Esc - close modal (retry)
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            if (btnRetry.style.display !== 'none') {
+              btnRetry.click();
+            } else if (btnMenu.style.display !== 'none') {
+              btnMenu.click();
+            }
+          }
+        }
+      });
+
+      // ---------- Start ----------
+      const lastMode = localStorage.getItem("yo_last_mode");
+      const lastDiff = localStorage.getItem("yo_last_difficulty");
+      if (lastMode) state.selectedMode = lastMode;
+      if (lastDiff) state.selectedDifficulty = lastDiff;
+
+      showModeSelect();
+    })();
+  </script>
+</body>
+
 </html>
