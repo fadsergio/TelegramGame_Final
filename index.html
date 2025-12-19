@@ -149,8 +149,8 @@
 
     /* Hint pill with pulsing effect when active */
     #pillHint {
-      display: none;
-      /* Скрыт счетчик подсказок */
+      transition: all .2s ease;
+      font-size: 16px;
     }
 
     #pillHint:not(.dim) {
@@ -1055,7 +1055,7 @@
           ],
           solution: { kind: "tap", index: 0 },
           hints: ["Один вариант выглядит как явное «предупреждение».", "Красный здесь плохая идея."],
-          fail: { why: "Правило уровня: красный — приманка. Не нажимай красное.", clue: "Намёк был в фразе «красный флаг» + цвете кнопки." }
+          fail: { why: "Неправильный выбор. Обрати внимание на сигналы.", clue: "Намёк был в тексте: «красный свет — стоп»." }
         },
         {
           id: 4, diff: "Плут", tag: "Шрифт",
@@ -1534,20 +1534,20 @@
             { text: "2", style: { tone: "blue", weight: 900 } },
             { text: "3", style: { tone: "blue", weight: 900 } }
           ],
-          solution: { kind: "sequence", seq: [0, 1, 2] },
+          solution: { kind: "sequence", indexes: [0, 1, 2], withinMs: 2000 },
           hints: ["Нажимай по порядку номеров.", "1 → 2 → 3."],
           fail: { why: "Нужно было нажать в правильном порядке.", clue: "Намёк: «по порядку»." }
         },
         {
           id: 41, tag: "Обратный порядок",
-          text: "Обратный порядок открывает новое.",
+          text: "Читай справа налево. Конец — это начало.",
           sub: "Справа налево.",
           options: [
             { text: "начало", style: { tone: "green", weight: 900 } },
             { text: "середина", style: { tone: "green", weight: 900 } },
             { text: "конец", style: { tone: "green", weight: 900 } }
           ],
-          solution: { kind: "sequence", seq: [2, 1, 0] },
+          solution: { kind: "sequence", indexes: [2, 1, 0], withinMs: 2000 },
           hints: ["Нажимай справа налево.", "Конец → Середина → Начало."],
           fail: { why: "Нужен был обратный порядок.", clue: "Намёк: «против течения»." }
         },
@@ -1649,8 +1649,8 @@
         { id: 86, tag: "Два раза", text: "Повторение — мать мастерства.", options: [{ text: "клик", style: { tone: "blue", weight: 950 } }, { text: "клик", style: { tone: "blue", weight: 950 } }, { text: "один", style: { tone: "gray", weight: 900 }, passive: true }], solution: { kind: "doubleTap", index: 0 }, hints: ["Двойной клик.", "Нажми первую дважды."], fail: { why: "Нужен двойной клик.", clue: "Намёк: «дважды»." } },
         { id: 87, tag: "Держи", text: "Терпение вознаграждается.", options: [{ text: "держу", style: { tone: "blue", weight: 950 } }, { text: "отпускаю", style: { tone: "gray", weight: 900 }, passive: true }, { text: "жду", style: { tone: "gray", weight: 900 }, passive: true }], solution: { kind: "hold", index: 0, ms: 1000 }, hints: ["Удержи кнопку.", "Нажми и держи."], fail: { why: "Нужно удержать.", clue: "Намёк: «держи»." } },
         { id: 88, tag: "Жди 3 сек", text: "Иногда молчание — ответ.", options: [{ text: "жду", style: { tone: "gray", weight: 900 }, passive: true }, { text: "жду", style: { tone: "gray", weight: 900 }, passive: true }, { text: "жду", style: { tone: "gray", weight: 900 }, passive: true }], solution: { kind: "wait", ms: 3000 }, hints: ["Не трогай экран.", "Просто жди."], fail: { why: "Нужно было ждать.", clue: "Намёк: «жди»." } },
-        { id: 89, tag: "1-2-3", text: "Последовательность — ключ.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "blue", weight: 900 } }, { text: "3", style: { tone: "blue", weight: 900 } }], solution: { kind: "sequence", seq: [0, 1, 2] }, hints: ["По порядку.", "1 → 2 → 3."], fail: { why: "Нужен порядок.", clue: "Намёк: «1-2-3»." } },
-        { id: 90, tag: "3-2-1", text: "Обратный путь тоже путь.", options: [{ text: "3", style: { tone: "green", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "1", style: { tone: "green", weight: 900 } }], solution: { kind: "sequence", seq: [0, 1, 2] }, hints: ["Слева направо.", "3 → 2 → 1."], fail: { why: "Нужен отсчёт.", clue: "Намёк: «3-2-1»." } },
+        { id: 89, tag: "1-2-3", text: "Последовательность — ключ.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "blue", weight: 900 } }, { text: "3", style: { tone: "blue", weight: 900 } }], solution: { kind: "sequence", indexes: [0, 1, 2], withinMs: 2000 }, hints: ["По порядку.", "1 → 2 → 3."], fail: { why: "Нужен порядок.", clue: "Намёк: «1-2-3»." } },
+        { id: 90, tag: "3-2-1", text: "Обратный путь тоже путь.", options: [{ text: "3", style: { tone: "green", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "1", style: { tone: "green", weight: 900 } }], solution: { kind: "sequence", indexes: [0, 1, 2], withinMs: 2000 }, hints: ["Слева направо.", "3 → 2 → 1."], fail: { why: "Нужен отсчёт.", clue: "Намёк: «3-2-1»." } },
         { id: 91, tag: "Не первый", text: "Первенство не гарантирует победу.", options: [{ text: "первый", style: { tone: "red", weight: 900 } }, { text: "второй", style: { tone: "green", weight: 900 } }, { text: "третий", style: { tone: "blue", weight: 900 } }], solution: { kind: "tapAnyExcept", index: 0 }, hints: ["Не первый.", "Любой кроме первого."], fail: { why: "Первый запрещён.", clue: "Намёк: «не первый»." } },
         { id: 92, tag: "Не последний", text: "Последний не значит худший.", options: [{ text: "первый", style: { tone: "green", weight: 900 } }, { text: "второй", style: { tone: "blue", weight: 900 } }, { text: "последний", style: { tone: "red", weight: 900 } }], solution: { kind: "tapAnyExcept", index: 2 }, hints: ["Не последний.", "Любой кроме последнего."], fail: { why: "Последний запрещён.", clue: "Намёк: «не последний»." } },
         { id: 93, tag: "Чётное", text: "Делится без остатка.", options: [{ text: "3", style: { tone: "red", weight: 900 } }, { text: "4", style: { tone: "green", weight: 900 } }, { text: "5", style: { tone: "blue", weight: 900 } }], solution: { kind: "tap", index: 1 }, hints: ["Чётное делится на 2.", "Четыре."], fail: { why: "Нужно чётное.", clue: "Намёк: «чётное»." } },
@@ -1685,10 +1685,10 @@
         // Hard 122-135 (14 levels)
         { id: 122, tag: "Комбо", text: "Синий любит повторения. Зелёный ждёт своей очереди.", options: [{ text: "синий", style: { tone: "blue", weight: 950 } }, { text: "зелёный", style: { tone: "green", weight: 900 } }, { text: "красный", style: { tone: "red", weight: 900 } }], solution: { kind: "combo", parts: [{ kind: "doubleTap", index: 0 }, { kind: "tap", index: 1 }] }, hints: ["Двойной клик по синему, затем зелёный.", "Синий×2 → Зелёный."], fail: { why: "Неправильная комбинация.", clue: "Намёк: «повторения» и «очередь»." } },
         { id: 123, tag: "Запрет+Действие", text: "Красный флаг — опасность. Повтор — сила.", options: [{ text: "синий", style: { tone: "blue", weight: 950 } }, { text: "синий", style: { tone: "blue", weight: 950 } }, { text: "красный", style: { tone: "red", weight: 900 } }], solution: { kind: "combo", parts: [{ kind: "doubleTap", index: 0 }, { kind: "forbidColor", color: "red" }] }, hints: ["Двойной клик не по красному.", "Синий дважды."], fail: { why: "Нарушено условие.", clue: "Намёк: «флаг» и «повтор»." } },
-        { id: 124, tag: "Тройная", text: "Начало знает конец. Середина — мост.", options: [{ text: "А", style: { tone: "blue", weight: 900 } }, { text: "Б", style: { tone: "green", weight: 900 } }, { text: "В", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", seq: [0, 1, 0] }, hints: ["А → Б → А.", "Туда и обратно."], fail: { why: "Неправильная последовательность.", clue: "Намёк: «начало знает конец»." } },
-        { id: 125, tag: "Зигзаг", text: "Молния не идёт прямо. Она прыгает.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "3", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", seq: [0, 2, 1] }, hints: ["1 → 3 → 2.", "Через одну."], fail: { why: "Неправильный порядок.", clue: "Намёк: «молния прыгает»." } },
-        { id: 126, tag: "Круговой", text: "Конец — это новое начало. Круг вечен.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "3", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", seq: [0, 1, 2, 0] }, hints: ["Полный круг.", "1→2→3→1."], fail: { why: "Неполный круг.", clue: "Намёк: «конец — начало»." } },
-        { id: 127, tag: "Маятник", text: "Центр знает оба края. Ритм — это баланс.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "3", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", seq: [1, 0, 2, 1] }, hints: ["Центр → Лево → Право → Центр.", "2→1→3→2."], fail: { why: "Неправильное движение.", clue: "Намёк: «центр знает края»." } },
+        { id: 124, tag: "Тройная", text: "Начало знает конец. Середина — мост.", options: [{ text: "А", style: { tone: "blue", weight: 900 } }, { text: "Б", style: { tone: "green", weight: 900 } }, { text: "В", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", indexes: [0, 1, 0], withinMs: 2000 }, hints: ["А → Б → А.", "Туда и обратно."], fail: { why: "Неправильная последовательность.", clue: "Намёк: «начало знает конец»." } },
+        { id: 125, tag: "Зигзаг", text: "Молния не идёт прямо. Она прыгает.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "3", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", indexes: [0, 2, 1], withinMs: 2000 }, hints: ["1 → 3 → 2.", "Через одну."], fail: { why: "Неправильный порядок.", clue: "Намёк: «молния прыгает»." } },
+        { id: 126, tag: "Круговой", text: "Конец — это новое начало. Круг вечен.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "3", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", indexes: [0, 1, 2, 0], withinMs: 2000 }, hints: ["Полный круг.", "1→2→3→1."], fail: { why: "Неполный круг.", clue: "Намёк: «конец — начало»." } },
+        { id: 127, tag: "Маятник", text: "Центр знает оба края. Ритм — это баланс.", options: [{ text: "1", style: { tone: "blue", weight: 900 } }, { text: "2", style: { tone: "green", weight: 900 } }, { text: "3", style: { tone: "red", weight: 900 } }], solution: { kind: "sequence", indexes: [1, 0, 2, 1], withinMs: 2000 }, hints: ["Центр → Лево → Право → Центр.", "2→1→3→2."], fail: { why: "Неправильное движение.", clue: "Намёк: «центр знает края»." } },
         { id: 128, tag: "Двойной запрет", text: "Огонь и лёд запрещены. Что остаётся?", options: [{ text: "синий", style: { tone: "blue", weight: 900 } }, { text: "зелёный", style: { tone: "green", weight: 900 } }, { text: "красный", style: { tone: "red", weight: 900 } }], solution: { kind: "combo", parts: [{ kind: "forbidColor", color: "red" }, { kind: "forbidColor", color: "blue" }] }, hints: ["Только зелёный.", "Не красный и не синий."], fail: { why: "Нарушен запрет.", clue: "Намёк: «огонь и лёд»." } },
         { id: 129, tag: "Удержание+Запрет", text: "Терпение — добродетель. Опасность — враг.", options: [{ text: "синий", style: { tone: "blue", weight: 950 } }, { text: "зелёный", style: { tone: "green", weight: 900 } }, { text: "красный", style: { tone: "red", weight: 900 } }], solution: { kind: "combo", parts: [{ kind: "hold", index: 0, ms: 800 }, { kind: "forbidColor", color: "red" }] }, hints: ["Удержи не красную.", "Держи синюю."], fail: { why: "Неправильное действие.", clue: "Намёк: «терпение» и «опасность»." } },
         { id: 130, tag: "Ожидание+Клик", text: "Тишина перед бурей. Момент истины.", options: [{ text: "жду", style: { tone: "gray", weight: 900 }, passive: true }, { text: "клик", style: { tone: "green", weight: 900 } }, { text: "жду", style: { tone: "gray", weight: 900 }, passive: true }], solution: { kind: "combo", parts: [{ kind: "wait", ms: 2000 }, { kind: "tap", index: 1 }] }, hints: ["Сначала жди, потом клик.", "2 сек → Клик."], fail: { why: "Неправильная последовательность.", clue: "Намёк: «тишина перед бурей»." } },
